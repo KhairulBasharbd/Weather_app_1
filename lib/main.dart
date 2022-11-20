@@ -7,10 +7,12 @@ import 'dart:convert';
 import 'dart:async';
 
 Future<WeatherInfo> fetchWeather() async {
-  const zipCode = "6205";
+  //const zipCode = "6205";
+  var lat = "24.37019177228249";
+  var lon = "88.6371962195062";
   final apiKey = "5385ee950371ca21a34d833d96b3a9b7";
   final requestUrl =
-      "https://api.openweathermap.org/data/2.5/weather?zip=${zipCode},bd&appid=${apiKey}";
+      "https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang={ja}";
   final response = await http.get(Uri.parse(requestUrl));
   if (response.statusCode == 200) {
     return WeatherInfo.fromJson(jsonDecode(response.body));
@@ -27,6 +29,8 @@ class WeatherInfo {
   final String weather;
   final int humidity;
   final double windSpeed;
+  var sunrise;
+  var sunset;
 
   WeatherInfo(
       {required this.location,
@@ -35,7 +39,9 @@ class WeatherInfo {
       required this.tempMax,
       required this.weather,
       required this.humidity,
-      required this.windSpeed});
+      required this.windSpeed,
+      required this.sunrise,
+      required this.sunset});
 
   factory WeatherInfo.fromJson(Map<String, dynamic> json) {
     return WeatherInfo(
@@ -45,7 +51,9 @@ class WeatherInfo {
         tempMax: json['main']['temp_max'],
         weather: json['weather'][0]['description'],
         humidity: json['main']['humidity'],
-        windSpeed: json['wind']['speed']);
+        windSpeed: json['wind']['speed'],
+        sunrise: json['sys']['sunrise'],
+        sunset: json['sys']['sunset']);
   }
 }
 
@@ -84,6 +92,12 @@ class _MyApp extends State<MyApp> {
             weather: snapshot.data!.weather,
             humidity: snapshot.data!.humidity,
             windSpeed: snapshot.data!.windSpeed,
+            sunrise: snapshot.data!.sunrise,
+            sunset: snapshot.data!.sunset,
+          );
+        } else if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(
+            child: CircularProgressIndicator(),
           );
         } else {
           return Center(
